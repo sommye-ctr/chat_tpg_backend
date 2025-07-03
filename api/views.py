@@ -4,16 +4,15 @@ from rest_framework.views import APIView
 from openai import OpenAI, RateLimitError
 from os import getenv
 
+model_mapping = {
+    'deepseek-v3': "deepseek/deepseek-chat-v3-0324:free",
+    'deepseek-r1': "deepseek/deepseek-r1:free",
+    'gemini-2.0': "google/gemini-2.0-flash-exp:free",
+    'qwen3': "qwen/qwen3-32b:free",
+    'gemma-3': "google/gemma-3-27b-it:free",
+}
 
 def _get_model_name(model: str):
-    model_mapping = {
-        'deepseek-v3': "deepseek/deepseek-chat-v3-0324:free",
-        'deepseek-r1': "deepseek/deepseek-r1:free",
-        'gemini-2.0': "google/gemini-2.0-flash-exp:free",
-        'qwen3': "qwen/qwen3-32b:free",
-        'gemma-3': "google/gemma-3-27b-it:free",
-    }
-
     if model not in model_mapping:
         raise ValueError()
 
@@ -22,7 +21,11 @@ def _get_model_name(model: str):
 
 # Create your views here.
 class AIView(APIView):
-    http_method_names = ["post"]
+    http_method_names = ["post", "get"]
+
+    def get(self, request):
+        models = list(model_mapping.keys())
+        return Response(models, status=status.HTTP_200_OK)
 
     def post(self, request):
         if not request.data:
